@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title></title>
+        
+  <script type="text/javascript" src="../lib/d3/d3.js"></script>
+  <script type="text/javascript" src="../lib/d3/d3.csv.js"></script>
+  <script type="text/javascript" src="../lib/d3/d3.layout.js"></script>
+  <script type="text/javascript" src="parallel-coordinates-veggie.js"></script>
+
+  <script type="text/javascript" src="../lib/jquery.js"></script>
+  <script type="text/javascript" src="../lib/underscore.js"></script>
+  <script type="text/javascript" src="../lib/backbone.js"></script>
+
+  <script src="../lib/jquery-ui-1.8.16.custom.min.js"></script>
+  <script type="text/javascript" src="filter.js"></script>
+  
+  <!-- SlickGrid -->
+  <link rel="stylesheet" href="../lib/slickgrid/slick.grid.css" type="text/css" media="screen" charset="utf-8" />
+  <script src="../lib/slickgrid/jquery.event.drag-2.0.min.js"></script>
+  <script src="../lib/slickgrid/slick.core.js"></script>
+  <script src="../lib/slickgrid/slick.grid.js"></script>
+  <script src="../lib/slickgrid/slick.dataview.js"></script>
+  <script src="../lib/slickgrid/slick.pager.js"></script>
+  <script src="grid.js"></script>
+  <script src="pie.js"></script>
+  <script src="options.js"></script>
+  <script src="data/univer.js"></script>
+  <link rel="stylesheet" href="style.css" type="text/css" charset="utf-8" />
+</head>
+
+<body>
+
+<h4>ВНИМАНИЕ! Для того чтобы выбрать вузы по определенному показателю, необходимо выделить необходимый отрезок по любой вертикальной шкале из представленных ниже и нажать кнопку «Перестроить график по выборке». Кнопка «Вернуть» вернет инфографику в исходное состояние.</h4>
+
+<div id="main">
+  <div class="widgets">
+    <div id="totals" class="widget right">Выделено<br/></div>
+    <div id="pie" class="widget right">Выборка<br/></div>
+    <a href="index.html" class="button filter_control">Вернуть</a>
+    <a href="index.html#" id="keep_selected" class="button filter_control">Перестроить график по выборке</a>
+    <div id="pager" class="info"></div>
+        <div id="legend">
+    </div>
+  </div>
+  <div id="parallel">
+  </div>
+  <div id="myGrid"></div>
+
+<p>
+<ul>
+<li><b>Баллы ЕГЭ</b> — средний балл студентов, принятых по результатам единого госэкзамена на обучение по очной форме и на бюджетные места.</li>
+
+<li><b>Исследования</b> — объем научно-исследовательских и опытно-конструкторских работ в пересчете на одного научно-педагогического работника.</li>
+
+<li><b>Иностранцы</b> — удельный вес численности иностранных студентов, выходцев из дальнего и ближнего зарубежья.</li>
+
+<li><b>Доходы вуза</b> учитывались изо всех источников и пересчитывались на одного научно-педагогического работника.</li>
+
+<li><b>Инфраструктура</b> — общая площадь учебно-научных помещений вуза в расчете на одного студента.</li>
+
+<li><b>Рейтинг</b> — количество <a href="http://минобрнауки.рф/%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8/2932/%D1%84%D0%B0%D0%B9%D0%BB/1466/%D0%9F%D0%BE%D0%BA%D0%B0%D0%B7%D0%B0%D1%82%D0%B5%D0%BB%D0%B8_%D0%BC%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3%D0%B0-%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_3.pdf" target="_blank">показателей</a>, по которым вуз преодолел пороговые значения, <a href="http://минобрнауки.рф/%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8/2932/%D1%84%D0%B0%D0%B9%D0%BB/1464/%D0%9F%D0%BE%D0%BA%D0%B0%D0%B7%D0%B0%D1%82%D0%B5%D0%BB%D0%B8_%D0%BC%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3%D0%B0-%D0%9F%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5_1.pdf" target="_blank">установленные</a> Минобрнауки (для столичных и региональных учебных заведений они были различными). Те вузы, что набрали меньше двух «баллов», стали именоваться «имеющими признаки неэффективности».</li>
+
+<li><b>Зарплата</b> — <a href="http://минобрнауки.рф/%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8/2849/%D1%84%D0%B0%D0%B9%D0%BB/1341/12.11.23-%D0%92%D1%83%D0%B7%D1%8B-%D0%9E%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8C-%D0%9C%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3.pdf" target="_blank">данные</a> о средней заработной плате штатных преподавателей вузов за октябрь 2012 года.</li>
+
+<li><b>Зарплата в регионе</b> — данные о средней заработной плате в субъекте федерации, в котором находится конкретный вуз (выведены из <a href="http://минобрнауки.рф/%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8/2849/%D1%84%D0%B0%D0%B9%D0%BB/1341/12.11.23-%D0%92%D1%83%D0%B7%D1%8B-%D0%9E%D0%BA%D1%82%D1%8F%D0%B1%D1%80%D1%8C-%D0%9C%D0%BE%D0%BD%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%BD%D0%B3.pdf" target="_blank">сведений</a>, предоставленных Минобрнауки).</li>
+
+<li><b>Доходы ректора</b> — <a href="http://минобрнауки.рф/%D0%BD%D0%BE%D0%B2%D0%BE%D1%81%D1%82%D0%B8/3432/%D1%84%D0%B0%D0%B9%D0%BB/2261/13.04.06-%D0%94%D0%BE%D1%85%D0%BE%D0%B4%D1%8B-%D0%A0%D0%B5%D0%BA%D1%82%D0%BE%D1%80%D1%8B.pdf" target="_blank">сведения</a> о доходах руководителей высших учебных заведений за 2012 год.</li>
+</ul>
+</p>
+  <script type="text/javascript">
+  
+  $(function() {
+  
+    var dimensions = new Filter();
+    var highlighter = new Selector();
+
+    dimensions.set({data: univ });
+
+    var columns = _(univ[0]).keys();
+    columns =  _(columns).without('group');
+
+    var axes = _(columns).without('name', 'group');
+
+    var regiongroups =
+      ["Дальневосточный федеральный округ", "Приволжский федеральный округ", "Северо-Западный федеральный округ", "Северо-Кавказский федеральный округ", "Сибирский федеральный округ", "Уральский федеральный округ", "Центральный федеральный округ", "Южный федеральный округ"];
+    
+    var colors = {"Дальневосточный федеральный округ" : "#b58900", "Приволжский федеральный округ" : "#6c71c4", "Северо-Западный федеральный округ" : "#cb4b16", "Северо-Кавказский федеральный округ" : "#268bd2", "Сибирский федеральный округ" : "#dc322f", "Уральский федеральный округ" : "#859900", "Центральный федеральный округ" : "#2aa198", "Южный федеральный округ" : "#d33682" }
+    
+    _(regiongroups).each(function(group) {
+      $('#legend').append("<div class='item'><div class='color' style='background: " + colors[group] + "';></div><div class='key'>" + group + "</div></div>");
+    });
+
+    var pc = parallel(dimensions, colors);
+    var pie = piegroups(univ, regiongroups, colors, 'group');
+    var totals = pietotals(
+      ['in', 'out'],
+      [_(univ).size(), 0]
+    );
+
+    var slicky = new grid({
+      model: dimensions,
+      selector: highlighter,
+      width: $('body').width(),
+      columns: columns
+    });
+    
+    // vertical full screen
+    var parallel_height = $(window).height() - 64 - 12 - 120 - 320;
+    if (parallel_height < 120) parallel_height = 120;  // min height
+    if (parallel_height > 340) parallel_height = 340;  // max height
+    $('#parallel').css({
+        height: parallel_height + 'px',
+        width: $(window).width() + 'px'
+    });
+    
+    slicky.update();
+    pc.render();
+
+    dimensions.bind('change:filtered', function() {
+      var data = dimensions.get('data');
+      var filtered = dimensions.get('filtered');
+      var data_size = _(data).size();
+      var filtered_size = _(filtered).size();
+      pie.update(filtered);
+      totals.update([filtered_size, data_size - filtered_size]);
+      
+      var opacity = _([2/Math.pow(filtered_size,0.37), 100]).min();
+      $('#line_opacity').val(opacity).change();
+    });
+    
+    highlighter.bind('change:selected', function() {
+      var highlighted = this.get('selected');
+      pc.highlight(highlighted);
+    });
+
+    $('#remove_selected').click(function() {
+      dimensions.outliers();
+      pc.update(dimensions.get('data'));
+      pc.render();
+      dimensions.trigger('change:filtered');
+      return false;
+    });
+    
+    $('#keep_selected').click(function() {
+      dimensions.inliers();
+      pc.update(dimensions.get('data'));
+      pc.render();
+      dimensions.trigger('change:filtered');
+      return false;
+    });
+    
+    $('#export_selected').click(function() {
+      var data = dimensions.get('filtered');
+      var keys = _.keys(data[0]);
+      var csv = _(keys).map(function(d) { return '"' + addslashes(d) + '"'; }).join(",");
+      _(data).each(function(row) {
+        csv += "\n";
+        csv += _(keys).map(function(k) {
+          var val = row[k];
+          if (_.isString(val)) {
+            return '"' + addslashes(val) + '"';
+          }
+          if (_.isNumber(val)) {
+            return val;
+          }
+          if (_.isNull(val)) {
+            return "";
+          }
+        }).join(",");
+      });
+      var uriContent = "data:application/octet-stream," + encodeURIComponent(csv);
+      var myWindow = window.open(uriContent, "Nutrient CSV");
+      myWindow.focus();
+      return false;
+    });
+
+    $('#line_opacity').change(function() {
+      var val = $(this).val();
+      $('#parallel .foreground path').css('stroke-opacity', val.toString());
+      $('#opacity_level').html((Math.round(val*10000)/100) + "%");
+    });
+    
+    $('#parallel').resize(function() {
+      // vertical full screen
+      pc.render();
+      var val = $('#line_opacity').val();
+      $('#parallel .foreground path').css('stroke-opacity', val.toString());
+    });
+    
+    $('#parallel').resizable({
+      handles: 's',
+      resize: function () { return false; }
+    });
+    
+    $('#myGrid').resizable({
+      handles: 's'
+    });
+
+    function addslashes( str ) {
+      return (str+'')
+        .replace(/\"/g, "\"\"")        // escape double quotes
+        .replace(/\0/g, "\\0");        // replace nulls with 0
+    };
+  
+  });
+
+  </script>
+  <!--
+    <p>
+     Copyright 2011, Kai Chang
+    </p>
+    <p>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+    </p>
+    <p>
+         http://www.apache.org/licenses/LICENSE-2.0
+    </p>
+    <p>
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+	-->
+</div>
+</body>
+</html>
